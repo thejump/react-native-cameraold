@@ -840,6 +840,37 @@ public class RCTCameraModule extends ReactContextBaseJavaModule
         response.putInt("width", imgWidth);
         response.putInt("height", imgHeight);
 
+   try {
+            // NOTE: some devices rotate
+            ExifInterface ei = new ExifInterface(imageFile.getAbsolutePath());
+            int deviceOrientation = _sensorOrientationChecker.getOrientation();
+            Log.d("TEST", "Actual device orientation: " + String.valueOf(deviceOrientation));
+            int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    Log.d("TEST", "ORIENTATION_ROTATE_90");
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    Log.d("TEST", "ORIENTATION_ROTATE_180");
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    Log.d("TEST", "ORIENTATION_ROTATE_270");
+                    if ( orientation == 0 ) {
+                        // NOTE: had an issue with some android devices not rotating portrait images the correct way
+                        ei.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(ExifInterface.ORIENTATION_ROTATE_90));
+                        ei.saveAttributes();
+                    }
+                    break;
+                case ExifInterface.ORIENTATION_NORMAL:
+                    Log.d("TEST", "ORIENTATION_NORMAL");
+                default:
+                    break;
+            }
+        } catch(Exception e){
+            Log.d("TEST", e.toString());
+        }
+
+
         if(addToMediaStore) {
             // borrowed from react-native CameraRollManager, it finds and returns the 'internal'
             // representation of the image uri that was just saved.
