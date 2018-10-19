@@ -36,7 +36,7 @@
   }
   else {
     [[NSNotificationCenter defaultCenter]removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
-    [self changePreviewOrientation:orientation];
+ //   [self changePreviewOrientation:orientation];
   }
 }
 
