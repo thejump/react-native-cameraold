@@ -95,9 +95,10 @@ public class ResolveTakenPictureAsyncTask extends AsyncTask<Void, Void, Writable
                     mBitmap = rotateBitmap(mBitmap, 90);
                 }
 
-                if (mOptions.hasKey("width")) {
-                    mBitmap = resizeBitmap(mBitmap, mOptions.getInt("width"));
-                }
+                //if ratio is correct then make sure it's scaled down to 1920 by 1080, if it's wrong then I'm going to crop later anyway
+                mBitmap=cropBitmap(mBitmap);
+                
+                mBitmap = resizeBitmap(mBitmap);
 
                 if (mOptions.hasKey("mirrorImage") && mOptions.getBoolean("mirrorImage")) {
                     mBitmap = flipHorizontally(mBitmap);
@@ -165,12 +166,40 @@ public class ResolveTakenPictureAsyncTask extends AsyncTask<Void, Void, Writable
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
     }
 
-    private Bitmap resizeBitmap(Bitmap bm, int newWidth) {
+    private Bitmap resizeBitmap(Bitmap bm) {
         int width = bm.getWidth();
         int height = bm.getHeight();
-        float scaleRatio = (float) newWidth / (float) width;
+        if(width<=1080){
+            return mBitmap;
+        }
+        float scaleRatio = (float) 1080 / (float) width;
 
-        return Bitmap.createScaledBitmap(bm, newWidth, (int) (height * scaleRatio), true);
+        return Bitmap.createScaledBitmap(bm, 1080, (int) (height * scaleRatio), true);
+    }
+
+    private Bitmap cropBitmap(Bitmap bm) {
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+        int newHeight=width * (16/9);
+        int hDiff=height-newHeight;
+        if(hDiff==0){
+            return bm;
+        }
+        int x=0;
+        int newWidth=width;
+        int y=0;
+        if(hDiff>0){
+            y=hDiff/2;
+        }
+        if(hDiff<0){
+            y=0;
+            height=newHeight;
+            newWidth=height/(16/9);
+            int wDiff=width-newWidth;
+            x=wDiff/2;
+        }
+        
+        return Bitmap.createBitmap(bm, x, y, newWidth,newHeight);
     }
 
     private Bitmap flipHorizontally(Bitmap source) {
