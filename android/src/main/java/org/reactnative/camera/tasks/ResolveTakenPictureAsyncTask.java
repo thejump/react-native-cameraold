@@ -97,7 +97,7 @@ public class ResolveTakenPictureAsyncTask extends AsyncTask<Void, Void, Writable
 
                 //if ratio is correct then make sure it's scaled down to 1920 by 1080, if it's wrong then I'm going to crop later anyway
                 mBitmap=cropBitmap(mBitmap);
-                
+
                 mBitmap = resizeBitmap(mBitmap);
 
                 if (mOptions.hasKey("mirrorImage") && mOptions.getBoolean("mirrorImage")) {
@@ -180,7 +180,8 @@ public class ResolveTakenPictureAsyncTask extends AsyncTask<Void, Void, Writable
     private Bitmap cropBitmap(Bitmap bm) {
         int width = bm.getWidth();
         int height = bm.getHeight();
-        int newHeight=width * (16/9);
+        float ratio=(float)16/(float)9;
+        int newHeight=Math.round((float) width * ratio);
         int hDiff=height-newHeight;
         if(hDiff==0){
             return bm;
@@ -193,12 +194,12 @@ public class ResolveTakenPictureAsyncTask extends AsyncTask<Void, Void, Writable
         }
         if(hDiff<0){
             y=0;
-            height=newHeight;
-            newWidth=height/(16/9);
+            newHeight=height;
+            newWidth=Math.round((float)height/ratio);
             int wDiff=width-newWidth;
             x=wDiff/2;
         }
-        
+
         return Bitmap.createBitmap(bm, x, y, newWidth,newHeight);
     }
 
