@@ -905,7 +905,10 @@ static NSDictionary *defaultFaceDetectorOptions = nil;
           
               
             [self rotateVideo:outputFileURL completion:^(NSURL *mirroredURL) {
-                 self.videoRecordedResolve(@{ @"uri": mirroredURL.absoluteString, @"codec":videoCodec });
+                AVAsset* videoAsset = [AVAsset assetWithURL:mirroredURL];
+                AVAssetTrack* clipVideoTrack = [[videoAsset tracksWithMediaType:AVMediaTypeVideo] firstObject];
+                
+                self.videoRecordedResolve(@{ @"uri": mirroredURL.absoluteString, @"codec":videoCodec,@"height":@(clipVideoTrack.naturalSize.height),@"width":@(clipVideoTrack.naturalSize.width) });
                 [self cleanupCamera];
             }];
       
