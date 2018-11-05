@@ -20,6 +20,7 @@ import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.DecodeHintType;
+import android.media.MediaMetadataRetriever;
 import com.google.zxing.MultiFormatReader;
 import com.google.zxing.Result;
 import org.reactnative.barcodedetector.RNBarcodeDetector;
@@ -27,6 +28,7 @@ import org.reactnative.camera.tasks.*;
 import org.reactnative.camera.utils.ImageDimensions;
 import org.reactnative.camera.utils.RNFileUtils;
 import org.reactnative.facedetector.RNFaceDetector;
+import android.graphics.Bitmap;
 
 import java.io.File;
 import java.io.IOException;
@@ -107,6 +109,14 @@ public class RNCameraView extends CameraView implements LifecycleEventListener, 
           if (path != null) {
             WritableMap result = Arguments.createMap();
             result.putString("uri", RNFileUtils.uriFromFile(new File(path)).toString());
+
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            retriever.setDataSource(path);
+            Bitmap bmp = retriever.getFrameAtTime();
+
+            result.putInt("width", bmp.getWidth());
+            result.putInt("height", bmp.getHeight());
+
             mVideoRecordedPromise.resolve(result);
           } else {
             mVideoRecordedPromise.reject("E_RECORDING", "Couldn't stop recording - there is none in progress");
